@@ -1,0 +1,16 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+
+# ASP.NET Core sensitive files
+appsettings.Development.json
+
+# VS Code / Rider
+.vscode/
+.idea/
