@@ -1,47 +1,58 @@
-﻿using Application.Common;
-using TODO.Application.DTOs;
+﻿using TODO.Application.DTOs;
 using TODO.Application.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+using ReservePro.Management.Api.Controllers; 
 
 namespace TODO.API.Controllers
 {
-
-    [Authorize]
+   // [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class RolesController(ILogger<RolesController> logger, IRolesService service) : ControllerBase
+    public class RolesController : BaseController
     {
-        private readonly IRolesService _service = service;
-        private readonly ILogger<RolesController> _logger = logger;
+        private readonly IRolesService _service;
+
+        public RolesController(IRolesService service, ILogger<BaseController> logger)
+            : base(logger)
+        {
+            _service = service;
+        }
 
         [HttpGet]
-        public async Task<ActionResult<Results<IEnumerable<RolesDTO>>>> Get()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
-                return await _service.GetAllAsync();
+                var result = await _service.GetAllAsync();
+                if (!result.Success)
+                    return HandleError(new Exception(result.Message), "Failed to retrieve roles.");
+
+                return HandleResponse(result, "Roles retrieved successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Get All Users");
-                return StatusCode(500, ErrorResult.Failed(ServiceError.CustomMessage(
-                    $"ExpMsg: {ex.Message}. {(ex.InnerException != null ? "InnerMsg: " + ex.InnerException.Message : "")}")));
+                return HandleError(ex, "Error occurred while retrieving roles.");
             }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Results<RolesDTO>>> Get(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             try
             {
-                return await _service.GetByIdAsync(id);
+                var result = await _service.GetByIdAsync(id);
+                if (!result.Success)
+                    return HandleError(new Exception(result.Message), $"Failed to retrieve role with Id {id}.");
+
+                return HandleResponse(result, "Role retrieved successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Get User By Id");
-                return StatusCode(500, ErrorResult.Failed(ServiceError.CustomMessage(
-                    $"ExpMsg: {ex.Message}. {(ex.InnerException != null ? "InnerMsg: " + ex.InnerException.Message : "")}")));
+                return HandleError(ex, "Error occurred while retrieving role by Id.");
             }
         }
 
@@ -50,19 +61,18 @@ namespace TODO.API.Controllers
         {
             try
             {
-                if (ModelState.IsValid)
-                {
-                    await _service.InsertAsync(model);
-                    return StatusCode(200, SuccessResult.Success(ServiceSuccess.Default));
-                }
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-                return BadRequest(ModelState);
+                var result = await _service.InsertAsync(model);
+                if (!result.Success)
+                    return HandleError(new Exception(result.Message), "Failed to create role.");
+
+                return HandleResponse(result, "Role created successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Create Role");
-                return StatusCode(500, ErrorResult.Failed(ServiceError.CustomMessage(
-                    $"ExpMsg: {ex.Message}. {(ex.InnerException != null ? "InnerMsg: " + ex.InnerException.Message : "")}")));
+                return HandleError(ex, "Error occurred while creating role.");
             }
         }
 
@@ -71,31 +81,32 @@ namespace TODO.API.Controllers
         {
             try
             {
-                await _service.UpdateAsync(id, model);
-                return StatusCode(200, SuccessResult.Success(ServiceSuccess.Default));
+                var result = await _service.UpdateAsync(id, model);
+                if (!result.Success)
+                    return HandleError(new Exception(result.Message), "Failed to update role.");
+
+                return HandleResponse(result, "Role updated successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Update Role");
-                return StatusCode(500, ErrorResult.Failed(ServiceError.CustomMessage(
-                    $"ExpMsg: {ex.Message}. {(ex.InnerException != null ? "InnerMsg: " + ex.InnerException.Message : "")}")));
+                return HandleError(ex, "Error occurred while updating role.");
             }
         }
-
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                await _service.DeleteAsync(id);
-                return StatusCode(200, SuccessResult.Success(ServiceSuccess.Default));
+                var result = await _service.DeleteAsync(id);
+                if (!result.Success)
+                    return HandleError(new Exception(result.Message), "Failed to delete role.");
+
+                return HandleResponse(result, "Role deleted successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Delete User");
-                return StatusCode(500, ErrorResult.Failed(ServiceError.CustomMessage(
-                    $"ExpMsg: {ex.Message}. {(ex.InnerException != null ? "InnerMsg: " + ex.InnerException.Message : "")}")));
+                return HandleError(ex, "Error occurred while deleting role.");
             }
         }
     }

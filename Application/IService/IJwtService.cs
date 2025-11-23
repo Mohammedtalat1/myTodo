@@ -9,6 +9,6 @@ namespace TODO.Application.IService
 {
     public interface IJwtService
     {
-        string GenerateToken(Account account);
+        string GenerateToken(Users user);
     }
 }

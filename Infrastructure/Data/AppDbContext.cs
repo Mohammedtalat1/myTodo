@@ -13,7 +13,6 @@ namespace TODO.Infrastructure.Data
         public DbSet<Permissions> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
 
-        public DbSet<Account> Accounts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -1,24 +1,13 @@
-﻿using Application.Models;
-using AutoMapper;
+﻿using AutoMapper;
 using TODO.Application.DTOs;
 using TODO.Domain.Entites;
 
-
-namespace Application.Common
+public class MappingProfile : Profile
 {
-    public class MappingConfig
+    public MappingProfile()
     {
-        public static IMapper Configure()
-        {
-            return new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Account, AccountDTO>().ReverseMap();
-                cfg.CreateMap<Users, UserDTO>().ReverseMap();
-                cfg.CreateMap<Roles, RolesDTO>().ReverseMap();
-
-
-            }).CreateMapper(); 
-
-        }
+        CreateMap<Users, UserDTO>().ReverseMap();
+        CreateMap<Roles, RolesDTO>().ReverseMap();
+        CreateMap<Permissions, PermissionsDTO>().ReverseMap();
     }
 }

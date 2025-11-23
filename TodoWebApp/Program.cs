@@ -3,14 +3,14 @@ using TODO.Application.IService;
 using TODO.Domain.IRepository;
 using TODO.Infrastructure.Data;
 using TODO.Infrastructure.Repository;
-using TODO.Infrastructure.Service.Impl;
-using TODO.Infrastructure.Services;
+using TODO.Application.Service.Impl;
 using Domain.IRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +19,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. DI Services & Repositories
-builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
@@ -34,7 +32,6 @@ builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
 // 3. AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddSingleton(MappingConfig.Configure());
 
 // 4. JWT Authentication
 builder.Services.AddAuthentication(options =>

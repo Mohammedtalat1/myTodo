@@ -1,19 +1,18 @@
 ﻿using Application.Models.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
-namespace TODO.Application.DTOs
+public class UserDTO : BaseDTO
 {
-    public class UserDTO : BaseDTO
-    {
-        public string? Email { get; set; }
-        public string? FullName { get; set; }
-        public string? Password { get; set; }
-        public string? RoleId { get; set; } 
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
 
+    [Required]
+    public string FullName { get; set; } = string.Empty;
 
-    }
+    [Required]
+    public string Password { get; set; } = string.Empty;
+
+    [Required]
+    public int RoleId { get; set; }
 }

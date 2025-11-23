@@ -1,19 +1,24 @@
-﻿using TODO.Domain.Entites;
+﻿using Infrastructure.Repository.BaseRepository;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using TODO.Domain.Entites;
 using TODO.Domain.IRepository;
 using TODO.Infrastructure.Data;
-using Infrastructure.Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TODO.Infrastructure.Repository
+namespace Infrastructure.Repository
 {
-    
-    public class UserRepository(AppDbContext productDbContext) : BaseRepository<Users>(productDbContext), IUserRepository
+    public class UserRepository : BaseRepository<Users>, IUserRepository
     {
+        private readonly AppDbContext _context;
 
+        public UserRepository(AppDbContext context) : base(context)
+        {
+            _context = context;
+        }
+
+        public async Task<Users?> GetByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
     }
 }

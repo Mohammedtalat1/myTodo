@@ -1,16 +1,15 @@
-﻿using Application.IService;
-using TODO.Application.DTOs;
+﻿using TODO.Application.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Application.IService.IBaseService;
 
 namespace TODO.Application.IService
 {
     public interface IPermissionsService : IBaseServices<PermissionsDTO>
     {
-        Task CreateAsync(PermissionsDTO permissionDto);
     }
 
 }

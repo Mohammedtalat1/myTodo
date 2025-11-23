@@ -1,52 +1,58 @@
-﻿using Application.Common;
-using TODO.Application.DTOs;
+﻿using TODO.Application.DTOs;
 using TODO.Application.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+using ReservePro.Management.Api.Controllers;
 
 namespace TODO.API.Controllers
 {
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class PermissionsController : ControllerBase
+    public class PermissionsController : BaseController
     {
         private readonly IPermissionsService _service;
-        private readonly ILogger<PermissionsController> _logger;
 
-        public PermissionsController(ILogger<PermissionsController> logger, IPermissionsService service)
+        public PermissionsController(IPermissionsService service, ILogger<BaseController> logger)
+            : base(logger)
         {
-            _logger = logger;
             _service = service;
         }
 
         [HttpGet]
-        public async Task<ActionResult<Results<IEnumerable<PermissionsDTO>>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
-                return await _service.GetAllAsync();
+                var result = await _service.GetAllAsync();
+                if (!result.Success)
+                    return HandleError(new Exception(result.Message), "Failed to retrieve permissions.");
+
+                return HandleResponse(result, "Permissions retrieved successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Get All Permissions");
-                return StatusCode(500, ErrorResult.Failed(ServiceError.CustomMessage(
-                    $"ExpMsg: {ex.Message}. {(ex.InnerException != null ? "InnerMsg: " + ex.InnerException.Message : "")}")));
+                return HandleError(ex, "Error occurred while retrieving all permissions.");
             }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Results<PermissionsDTO>>> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             try
             {
-                return await _service.GetByIdAsync(id);
+                var result = await _service.GetByIdAsync(id);
+                if (!result.Success)
+                    return HandleError(new Exception(result.Message), $"Failed to retrieve permission with Id {id}.");
+
+                return HandleResponse(result, "Permission retrieved successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Get Permission By Id");
-                return StatusCode(500, ErrorResult.Failed(ServiceError.CustomMessage(
-                    $"ExpMsg: {ex.Message}. {(ex.InnerException != null ? "InnerMsg: " + ex.InnerException.Message : "")}")));
+                return HandleError(ex, "Error occurred while retrieving permission by Id.");
             }
         }
 
@@ -55,19 +61,18 @@ namespace TODO.API.Controllers
         {
             try
             {
-                if (ModelState.IsValid)
-                {
-                    await _service.InsertAsync(model);
-                    return StatusCode(200, SuccessResult.Success(ServiceSuccess.Default));
-                }
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-                return BadRequest(ModelState);
+                var result = await _service.InsertAsync(model);
+                if (!result.Success)
+                    return HandleError(new Exception(result.Message), "Failed to create permission.");
+
+                return HandleResponse(result, "Permission created successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Create Permission");
-                return StatusCode(500, ErrorResult.Failed(ServiceError.CustomMessage(
-                    $"ExpMsg: {ex.Message}. {(ex.InnerException != null ? "InnerMsg: " + ex.InnerException.Message : "")}")));
+                return HandleError(ex, "Error occurred while creating permission.");
             }
         }
 
@@ -76,14 +81,15 @@ namespace TODO.API.Controllers
         {
             try
             {
-                await _service.UpdateAsync(id, model);
-                return StatusCode(200, SuccessResult.Success(ServiceSuccess.Default));
+                var result = await _service.UpdateAsync(id, model);
+                if (!result.Success)
+                    return HandleError(new Exception(result.Message), "Failed to update permission.");
+
+                return HandleResponse(result, "Permission updated successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Update Permission");
-                return StatusCode(500, ErrorResult.Failed(ServiceError.CustomMessage(
-                    $"ExpMsg: {ex.Message}. {(ex.InnerException != null ? "InnerMsg: " + ex.InnerException.Message : "")}")));
+                return HandleError(ex, "Error occurred while updating permission.");
             }
         }
 
@@ -92,14 +98,15 @@ namespace TODO.API.Controllers
         {
             try
             {
-                await _service.DeleteAsync(id);
-                return StatusCode(200, SuccessResult.Success(ServiceSuccess.Default));
+                var result = await _service.DeleteAsync(id);
+                if (!result.Success)
+                    return HandleError(new Exception(result.Message), "Failed to delete permission.");
+
+                return HandleResponse(result, "Permission deleted successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Delete Permission");
-                return StatusCode(500, ErrorResult.Failed(ServiceError.CustomMessage(
-                    $"ExpMsg: {ex.Message}. {(ex.InnerException != null ? "InnerMsg: " + ex.InnerException.Message : "")}")));
+                return HandleError(ex, "Error occurred while deleting permission.");
             }
         }
     }
