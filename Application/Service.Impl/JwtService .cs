@@ -1,5 +1,5 @@
 ﻿using TODO.Application.IService;
-using TODO.Domain.Entites;
+using TODO.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -23,20 +23,23 @@ namespace TODO.Application.Service.Impl
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
-            {
+			var claims = new[]
+			{
+	            new Claim("Id", user.Id.ToString()), 
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.RoleId.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+	            new Claim(ClaimTypes.Name, user.Username),
+	            new Claim(ClaimTypes.Email, user.Email),
+	            new Claim(ClaimTypes.Role, user.RoleId.ToString()),
+	            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var expires = DateTime.UtcNow.AddMinutes(
-                Convert.ToDouble(_configuration["Jwt:DurationInMinutes"])
-            );
 
-            var token = new JwtSecurityToken(
+			var expires = DateTime.UtcNow.AddMinutes(
+				Convert.ToDouble(_configuration["Jwt:DurationInMinutes"])
+			);
+
+
+			var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,

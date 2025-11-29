@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using ReservePro.Management.Api.Controllers; 
+using ReservePro.Management.Api.Controllers;
+using TODO.Application.Entities;
 
 namespace TODO.API.Controllers
 {

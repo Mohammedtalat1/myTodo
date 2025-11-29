@@ -6,8 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using ReservePro.Management.Api.Controllers; // BaseController namespace
-
+using ReservePro.Management.Api.Controllers; 
 namespace TODO.API.Controllers
 {
     [ApiController]
@@ -47,7 +46,12 @@ namespace TODO.API.Controllers
         {
             try
             {
-                int userId = int.Parse(User.Claims.First(c => c.Type == "Id").Value);
+                var idClaim = User.Claims.FirstOrDefault(c => c.Type == "Id");
+
+                if (idClaim == null)
+                    return HandleError(new Exception("User Id claim not found"), "Unauthorized user.");
+
+                int userId = int.Parse(idClaim.Value);
                 var result = await _authService.ChangePasswordAsync(userId, dto);
 
                 if (!result.Success)

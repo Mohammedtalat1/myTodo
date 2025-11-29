@@ -12,15 +12,15 @@ public abstract class Results
 
 public abstract class Results<T> : Results
 {
-    private T _data = default!;
+    private T _entity = default!;
 
-    protected Results(T data)
+    protected Results(T entity)
     {
-        Data = data;
+        Entity = entity;
     }
-    public T Data
+    public T Entity
     {
-        get => (_data != null ? _data : default)!;
-        set => _data = value;
+        get => (_entity != null ? _entity : default)!;
+        set => _entity = value;
     }
 }

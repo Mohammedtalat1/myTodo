@@ -18,22 +18,39 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. DI Services & Repositories
+// 2. DI Repositories
+
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<IAttachmentsRepository, AttachmentsRepository>();
+builder.Services.AddScoped<IBoardColumnsRepository, BoardColumnsRepository>();
+builder.Services.AddScoped<IBoardsRepository, BoardsRepository>();
+builder.Services.AddScoped<ICommentsRepository, CommentsRepository>();
+builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
+builder.Services.AddScoped<IProjectsRepository, ProjectsRepository>();
+builder.Services.AddScoped<IWorkItemsRepository, WorkItemsRepository>();
+
+// 3. DI Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IRolesService, RolesService>();
-builder.Services.AddScoped<IRolesRepository, RolesRepository>();
 builder.Services.AddScoped<IPermissionsService, PermissionService>();
-builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<IRolesService, RolesService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAttachmentsService, AttachmentsService>();
+builder.Services.AddScoped<IBoardColumnsService, BoardColumnsService>();
+builder.Services.AddScoped<IBoardsService, BoardsService>();
+builder.Services.AddScoped<ICommentsService, CommentsService>();
+builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
+builder.Services.AddScoped<IProjectsService, ProjectsService>();
+builder.Services.AddScoped<IWorkItemsService, WorkItemsService>();
 
 
-// 3. AutoMapper
+// 4. AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-// 4. JWT Authentication
+// 5. JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -56,10 +73,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// 5. Controllers
+// 6. Controllers
 builder.Services.AddControllers();
 
-// 6. Swagger with Bearer Auth
+// 7. Swagger with Bearer Auth
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

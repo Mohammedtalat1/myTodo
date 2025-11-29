@@ -6,10 +6,10 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using ReservePro.Management.Api.Controllers;
+using TODO.Application.Entities;
 
 namespace TODO.API.Controllers
 {
-    //[Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : BaseController
@@ -22,6 +22,7 @@ namespace TODO.API.Controllers
             _service = service;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -38,7 +39,7 @@ namespace TODO.API.Controllers
                 return HandleError(ex, "Error occurred while retrieving all users.");
             }
         }
-
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -55,7 +56,6 @@ namespace TODO.API.Controllers
                 return HandleError(ex, "Error occurred while retrieving user by Id.");
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] UserDTO model)
         {
@@ -75,7 +75,7 @@ namespace TODO.API.Controllers
                 return HandleError(ex, "Error occurred while creating user.");
             }
         }
-
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] UserDTO model)
         {
@@ -92,7 +92,7 @@ namespace TODO.API.Controllers
                 return HandleError(ex, "Error occurred while updating user.");
             }
         }
-
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

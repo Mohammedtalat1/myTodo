@@ -1,7 +1,7 @@
-﻿using Domain.Common;
+﻿using Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations;
 
-namespace TODO.Domain.Entites
+namespace TODO.Domain.Entities
 {
     public class Users : BaseEntity
     {
@@ -23,5 +23,7 @@ namespace TODO.Domain.Entites
         [Required]
         public int RoleId { get; set; }
         public Roles? Role { get; set; }
+        public ICollection<ProjectMember>? ProjectMemberships { get; set; }
+
     }
 }

@@ -3,7 +3,8 @@ using Application.Service.Impl.BaseService;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using TODO.Application.IService;
-using TODO.Domain.Entites;
+using TODO.Domain.Entities;
+using TODO.Application.Entities;
 using TODO.Domain.IRepository;
 
 public class UserService : BaseService<Users, UserDTO>, IUserService

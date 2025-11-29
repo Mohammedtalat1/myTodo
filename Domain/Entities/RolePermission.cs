@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TODO.Domain.Entites
+namespace TODO.Domain.Entities
 {
     public class RolePermission
     {

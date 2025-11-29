@@ -25,7 +25,7 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TODO.Domain.Entites.Permissions", b =>
+            modelBuilder.Entity("TODO.Domain.Entities.Permissions", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -56,7 +56,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Permissions");
                 });
 
-            modelBuilder.Entity("TODO.Domain.Entites.RolePermission", b =>
+            modelBuilder.Entity("TODO.Domain.Entities.RolePermission", b =>
                 {
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
@@ -71,7 +71,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("RolePermissions");
                 });
 
-            modelBuilder.Entity("TODO.Domain.Entites.Roles", b =>
+            modelBuilder.Entity("TODO.Domain.Entities.Roles", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -99,7 +99,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("TODO.Domain.Entites.Users", b =>
+            modelBuilder.Entity("TODO.Domain.Entities.Users", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -141,15 +141,15 @@ namespace Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TODO.Domain.Entites.RolePermission", b =>
+            modelBuilder.Entity("TODO.Domain.Entities.RolePermission", b =>
                 {
-                    b.HasOne("TODO.Domain.Entites.Permissions", "Permission")
+                    b.HasOne("TODO.Domain.Entities.Permissions", "Permission")
                         .WithMany()
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TODO.Domain.Entites.Roles", "Role")
+                    b.HasOne("TODO.Domain.Entities.Roles", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -160,9 +160,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("TODO.Domain.Entites.Users", b =>
+            modelBuilder.Entity("TODO.Domain.Entities.Users", b =>
                 {
-                    b.HasOne("TODO.Domain.Entites.Roles", "Role")
+                    b.HasOne("TODO.Domain.Entities.Roles", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -171,7 +171,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("TODO.Domain.Entites.Roles", b =>
+            modelBuilder.Entity("TODO.Domain.Entities.Roles", b =>
                 {
                     b.Navigation("RolePermissions");
 

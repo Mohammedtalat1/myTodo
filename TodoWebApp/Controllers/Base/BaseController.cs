@@ -19,23 +19,33 @@ namespace ReservePro.Management.Api.Controllers
             if (result == null)
             {
                 Logger.LogWarning("Requested resource not found.");
-                return NotFound(new { Message = "Resource not found." });
+                return NotFound(new
+                {
+                    message = "Resource not found.",
+                    success = false
+                });
             }
 
-            return Ok(new
+            var msgProp = result.GetType().GetProperty("Message");
+            if (msgProp != null && message != null)
             {
-                Message = message ?? "Request successful.",
-                Data = result
-            });
+                var currentValue = msgProp.GetValue(result);
+                if (currentValue == null)
+                    msgProp.SetValue(result, message);
+            }
+
+            return Ok(result);
         }
 
         protected IActionResult HandleError(Exception ex, string message = "An unexpected error occurred.")
         {
             Logger.LogError(ex, message);
+
             return StatusCode(500, new
             {
-                Message = message,
-                Error = ex.Message
+                message = message,
+                success = false,
+                error = ex.Message
             });
         }
     }

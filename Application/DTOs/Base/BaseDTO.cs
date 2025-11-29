@@ -1,4 +1,4 @@
-﻿namespace Application.Models.Base
+﻿namespace Application.DTOs.Base
 {
     public class BaseDTO
     {

@@ -1,4 +1,4 @@
-﻿using TODO.Domain.Entites;
+﻿using TODO.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
