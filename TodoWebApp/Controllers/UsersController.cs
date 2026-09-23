@@ -1,17 +1,16 @@
-﻿using TODO.Application.DTOs;
+using TODO.Application.DTOs;
 using TODO.Application.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
-using ReservePro.Management.Api.Controllers;
-using TODO.Application.Entities;
+using TODO.API.Controllers;
 
 namespace TODO.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UsersController : BaseController
     {
         private readonly IUserService _service;
@@ -22,92 +21,47 @@ namespace TODO.API.Controllers
             _service = service;
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var result = await _service.GetAllAsync();
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to retrieve users.");
-
-                return HandleResponse(result, "Users retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving all users.");
-            }
+            var result = await _service.GetAllAsync();
+            return HandleResponse(result, "Users retrieved successfully.");
         }
-        [Authorize]
-        [HttpGet("{id}")]
+
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var result = await _service.GetByIdAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), $"Failed to retrieve user with Id {id}.");
-
-                return HandleResponse(result, "User retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving user by Id.");
-            }
+            var result = await _service.GetByIdAsync(id);
+            return HandleResponse(result, "User retrieved successfully.");
         }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] UserDTO model)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                var result = await _service.InsertAsync(model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to create user.");
-
-                return HandleResponse(result, "User created successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while creating user.");
-            }
+            var result = await _service.InsertAsync(model);
+            return result.Success
+                ? Ok(new ApiResponse<int>(true, "User created successfully.", result.Entity))
+                : BadRequest(new ApiResponse<object>(false, result.Message ?? "Failed to create user."));
         }
-        [Authorize]
-        [HttpPut("{id}")]
+
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] UserDTO model)
         {
-            try
-            {
-                var result = await _service.UpdateAsync(id, model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to update user.");
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                return HandleResponse(result, "User updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while updating user.");
-            }
+            var result = await _service.UpdateAsync(id, model);
+            return HandleResponse(result, "User updated successfully.");
         }
-        [Authorize]
-        [HttpDelete("{id}")]
+
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var result = await _service.DeleteAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to delete user.");
-
-                return HandleResponse(result, "User deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while deleting user.");
-            }
+            var result = await _service.DeleteAsync(id);
+            return HandleResponse(result, "User deleted successfully.");
         }
     }
 }

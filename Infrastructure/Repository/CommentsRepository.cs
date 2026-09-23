@@ -1,5 +1,7 @@
-﻿using Infrastructure.Repository.BaseRepository;
+using Infrastructure.Repository.BaseRepository;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TODO.Domain.Entities;
 using TODO.Domain.IRepository;
@@ -16,5 +18,11 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
+        public async Task<IEnumerable<Comments>> GetByWorkItemIdAsync(int workItemId)
+        {
+            return await _context.Comments
+                .Where(c => c.TaskId == workItemId)
+                .ToListAsync();
+        }
     }
 }

@@ -1,17 +1,16 @@
-﻿using TODO.Application.DTOs;
+using TODO.Application.DTOs;
 using TODO.Application.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
-using ReservePro.Management.Api.Controllers;
-using TODO.Application.Entities;
+using TODO.API.Controllers;
 
 namespace TODO.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class WorkItemsController : BaseController
     {
         private readonly IWorkItemsService _service;
@@ -22,92 +21,78 @@ namespace TODO.API.Controllers
             _service = service;
         }
 
-        [Authorize]
+        /// <summary>Get all work items.</summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var result = await _service.GetAllAsync();
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to retrieve WorkItems.");
-
-                return HandleResponse(result, "WorkItems retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving all WorkItems.");
-            }
+            var result = await _service.GetAllAsync();
+            return HandleResponse(result, "WorkItems retrieved successfully.");
         }
-        [Authorize]
-        [HttpGet("{id}")]
+
+        /// <summary>Get all work items for a specific project.</summary>
+        [HttpGet("project/{projectId:int}")]
+        public async Task<IActionResult> GetByProject(int projectId)
+        {
+            var result = await _service.GetByProjectAsync(projectId);
+            return HandleResponse(result, "WorkItems for project retrieved successfully.");
+        }
+
+        /// <summary>Get all work items in a Kanban board column.</summary>
+        [HttpGet("column/{columnId:int}")]
+        public async Task<IActionResult> GetByColumn(int columnId)
+        {
+            var result = await _service.GetByColumnAsync(columnId);
+            return HandleResponse(result, "WorkItems for column retrieved successfully.");
+        }
+
+        /// <summary>Get a single work item by Id.</summary>
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var result = await _service.GetByIdAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), $"Failed to retrieve WorkItem with Id {id}.");
-
-                return HandleResponse(result, "WorkItem retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving WorkItem by Id.");
-            }
+            var result = await _service.GetByIdAsync(id);
+            return HandleResponse(result, "WorkItem retrieved successfully.");
         }
+
+        /// <summary>Create a new work item.</summary>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] WorkItemsDTO model)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                var result = await _service.InsertAsync(model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to create WorkItem.");
-
-                return HandleResponse(result, "WorkItem created successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while creating WorkItem.");
-            }
+            var result = await _service.InsertAsync(model);
+            return result.Success
+                ? Ok(new ApiResponse<int>(true, "WorkItem created successfully.", result.Entity))
+                : BadRequest(new ApiResponse<object>(false, result.Message ?? "Failed to create work item."));
         }
-        [Authorize]
-        [HttpPut("{id}")]
+
+        /// <summary>Update a work item.</summary>
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] WorkItemsDTO model)
         {
-            try
-            {
-                var result = await _service.UpdateAsync(id, model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to update WorkItem.");
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                return HandleResponse(result, "WorkItem updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while updating WorkItem.");
-            }
+            var result = await _service.UpdateAsync(id, model);
+            return HandleResponse(result, "WorkItem updated successfully.");
         }
-        [Authorize]
-        [HttpDelete("{id}")]
+
+        /// <summary>Move a work item to a different Kanban column.</summary>
+        [HttpPut("{id:int}/move/{columnId:int}")]
+        public async Task<IActionResult> MoveToColumn(int id, int columnId)
+        {
+            var result = await _service.MoveToColumnAsync(id, columnId);
+            return result.Success
+                ? Ok(new ApiResponse<object>(true, "WorkItem moved successfully."))
+                : BadRequest(new ApiResponse<object>(false, result.Message ?? "Failed to move work item."));
+        }
+
+        /// <summary>Delete a work item.</summary>
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var result = await _service.DeleteAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to delete WorkItem.");
-
-                return HandleResponse(result, "WorkItem deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while deleting WorkItem.");
-            }
+            var result = await _service.DeleteAsync(id);
+            return HandleResponse(result, "WorkItem deleted successfully.");
         }
     }
 }

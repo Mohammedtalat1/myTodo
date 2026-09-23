@@ -1,13 +1,10 @@
-﻿using Application.DTOs.Base;
+using Application.DTOs.Base;
 using Domain.Common.enums;
-using Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations;
-using System.Net.Mail;
-using System.Xml.Linq;
-using TODO.Domain.Entities;
 
-namespace TODO.Application.Entities
+namespace TODO.Application.DTOs
 {
+    /// <summary>DTO for a work item (Task, Bug, Epic, etc.) within a project.</summary>
     public class WorkItemsDTO : BaseDTO
     {
         [Required, MaxLength(200)]
@@ -28,12 +25,8 @@ namespace TODO.Application.Entities
         public int ProjectId { get; set; }
 
         public int? AssignedUserId { get; set; }
-
         public int? ParentId { get; set; }
         public int? Effort { get; set; }
-
-
         public int? ColumnId { get; set; }
-
     }
 }

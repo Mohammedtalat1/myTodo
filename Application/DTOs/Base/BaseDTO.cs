@@ -1,11 +1,12 @@
-﻿namespace Application.DTOs.Base
+namespace Application.DTOs.Base
 {
-    public class BaseDTO
+    /// <summary>
+    /// Base DTO aligned with BaseEntity. All domain DTOs inherit from this.
+    /// </summary>
+    public abstract class BaseDTO
     {
         public int Id { get; set; }
-        public required Guid CreateById { get; set; }
-        public Guid? UpdateById { get; set; }
-        public DateTime CreateAt { get; set; }
-        public DateTime UpdateAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

@@ -1,17 +1,16 @@
-﻿using TODO.Application.DTOs;
+using TODO.Application.DTOs;
 using TODO.Application.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
-using ReservePro.Management.Api.Controllers;
-using TODO.Application.Entities;
+using TODO.API.Controllers;
 
 namespace TODO.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CommentsController : BaseController
     {
         private readonly ICommentsService _service;
@@ -22,92 +21,60 @@ namespace TODO.API.Controllers
             _service = service;
         }
 
-        [Authorize]
+        /// <summary>Get all comments.</summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var result = await _service.GetAllAsync();
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to retrieve Comments.");
-
-                return HandleResponse(result, "Comments retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving all Comments.");
-            }
+            var result = await _service.GetAllAsync();
+            return HandleResponse(result, "Comments retrieved successfully.");
         }
-        [Authorize]
-        [HttpGet("{id}")]
+
+        /// <summary>Get all comments for a specific work item.</summary>
+        [HttpGet("workitem/{workItemId:int}")]
+        public async Task<IActionResult> GetByWorkItem(int workItemId)
+        {
+            var result = await _service.GetByWorkItemAsync(workItemId);
+            return HandleResponse(result, "Comments for work item retrieved successfully.");
+        }
+
+        /// <summary>Get a single comment by Id.</summary>
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var result = await _service.GetByIdAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), $"Failed to retrieve Comment with Id {id}.");
-
-                return HandleResponse(result, "Comment retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving Comment by Id.");
-            }
+            var result = await _service.GetByIdAsync(id);
+            return HandleResponse(result, "Comment retrieved successfully.");
         }
+
+        /// <summary>Create a new comment on a work item.</summary>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CommentsDTO model)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                var result = await _service.InsertAsync(model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to create Comment.");
-
-                return HandleResponse(result, "Comment created successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while creating Comment.");
-            }
+            var result = await _service.InsertAsync(model);
+            return result.Success
+                ? Ok(new ApiResponse<int>(true, "Comment created successfully.", result.Entity))
+                : BadRequest(new ApiResponse<object>(false, result.Message ?? "Failed to create comment."));
         }
-        [Authorize]
-        [HttpPut("{id}")]
+
+        /// <summary>Update a comment.</summary>
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] CommentsDTO model)
         {
-            try
-            {
-                var result = await _service.UpdateAsync(id, model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to update Comment.");
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                return HandleResponse(result, "Comment updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while updating Comment.");
-            }
+            var result = await _service.UpdateAsync(id, model);
+            return HandleResponse(result, "Comment updated successfully.");
         }
-        [Authorize]
-        [HttpDelete("{id}")]
+
+        /// <summary>Delete a comment.</summary>
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var result = await _service.DeleteAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to delete Comment.");
-
-                return HandleResponse(result, "Comment deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while deleting Comment.");
-            }
+            var result = await _service.DeleteAsync(id);
+            return HandleResponse(result, "Comment deleted successfully.");
         }
     }
 }

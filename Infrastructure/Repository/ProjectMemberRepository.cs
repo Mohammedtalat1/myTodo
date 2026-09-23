@@ -1,4 +1,4 @@
-﻿using Infrastructure.Repository.BaseRepository;
+using Infrastructure.Repository.BaseRepository;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using TODO.Domain.Entities;
@@ -16,5 +16,10 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
+        public async Task<bool> ExistsAsync(int userId, int projectId)
+        {
+            return await _context.ProjectMembers
+                .AnyAsync(pm => pm.UserId == userId && pm.ProjectId == projectId);
+        }
     }
 }

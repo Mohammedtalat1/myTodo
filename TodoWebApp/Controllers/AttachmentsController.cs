@@ -1,17 +1,16 @@
-﻿using TODO.Application.DTOs;
+using TODO.Application.DTOs;
 using TODO.Application.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
-using ReservePro.Management.Api.Controllers;
-using TODO.Application.Entities;
+using TODO.API.Controllers;
 
 namespace TODO.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class AttachmentsController : BaseController
     {
         private readonly IAttachmentsService _service;
@@ -22,92 +21,60 @@ namespace TODO.API.Controllers
             _service = service;
         }
 
-        [Authorize]
+        /// <summary>Get all attachments.</summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var result = await _service.GetAllAsync();
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to retrieve Attachments.");
-
-                return HandleResponse(result, "Attachments retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving all Attachments.");
-            }
+            var result = await _service.GetAllAsync();
+            return HandleResponse(result, "Attachments retrieved successfully.");
         }
-        [Authorize]
-        [HttpGet("{id}")]
+
+        /// <summary>Get all attachments for a specific work item.</summary>
+        [HttpGet("workitem/{workItemId:int}")]
+        public async Task<IActionResult> GetByWorkItem(int workItemId)
+        {
+            var result = await _service.GetByWorkItemAsync(workItemId);
+            return HandleResponse(result, "Attachments for work item retrieved successfully.");
+        }
+
+        /// <summary>Get a single attachment by Id.</summary>
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var result = await _service.GetByIdAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), $"Failed to retrieve Attachment with Id {id}.");
-
-                return HandleResponse(result, "Attachment retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving Attachment by Id.");
-            }
+            var result = await _service.GetByIdAsync(id);
+            return HandleResponse(result, "Attachment retrieved successfully.");
         }
+
+        /// <summary>Add an attachment metadata record to a work item.</summary>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] AttachmentsDTO model)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                var result = await _service.InsertAsync(model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to create Attachment.");
-
-                return HandleResponse(result, "Attachment created successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while creating Attachment.");
-            }
+            var result = await _service.InsertAsync(model);
+            return result.Success
+                ? Ok(new ApiResponse<int>(true, "Attachment created successfully.", result.Entity))
+                : BadRequest(new ApiResponse<object>(false, result.Message ?? "Failed to create attachment."));
         }
-        [Authorize]
-        [HttpPut("{id}")]
+
+        /// <summary>Update attachment metadata.</summary>
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] AttachmentsDTO model)
         {
-            try
-            {
-                var result = await _service.UpdateAsync(id, model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to update Attachment.");
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                return HandleResponse(result, "Attachment updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while updating Attachment.");
-            }
+            var result = await _service.UpdateAsync(id, model);
+            return HandleResponse(result, "Attachment updated successfully.");
         }
-        [Authorize]
-        [HttpDelete("{id}")]
+
+        /// <summary>Delete an attachment.</summary>
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var result = await _service.DeleteAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to delete Attachment.");
-
-                return HandleResponse(result, "Attachment deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while deleting Attachment.");
-            }
+            var result = await _service.DeleteAsync(id);
+            return HandleResponse(result, "Attachment deleted successfully.");
         }
     }
 }

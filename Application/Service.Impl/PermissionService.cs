@@ -1,4 +1,3 @@
-﻿using Application.IService;
 using Application.Service.Impl.BaseService;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
@@ -11,10 +10,12 @@ namespace TODO.Application.Service.Impl
 {
     public class PermissionService : BaseService<Permissions, PermissionsDTO>, IPermissionsService
     {
-        public PermissionService(IPermissionRepository permissionsRepository, IMapper mapper, ILogger<PermissionService> logger)
+        public PermissionService(
+            IPermissionRepository permissionsRepository,
+            IMapper mapper,
+            ILogger<PermissionService> logger)
             : base(permissionsRepository, mapper, logger)
         {
         }
-
     }
 }

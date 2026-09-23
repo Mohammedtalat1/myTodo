@@ -1,4 +1,4 @@
-﻿using Domain.IRepository.IBaseRepository;
+using Domain.IRepository.IBaseRepository;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -36,7 +36,15 @@ namespace Infrastructure.Repository.BaseRepository
         public async Task<int> InsertAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
-            return await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
+
+            var prop = entity.GetType().GetProperty("Id");
+            if (prop != null && prop.PropertyType == typeof(int))
+            {
+                return (int)prop.GetValue(entity)!;
+            }
+
+            return 1;
         }
 
         public async Task<int> UpdateAsync(T entity)

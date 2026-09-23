@@ -1,18 +1,25 @@
-﻿using TODO.Domain.Entities;
+using Infrastructure.Repository.BaseRepository;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using TODO.Domain.Entities;
 using TODO.Domain.IRepository;
 using TODO.Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Infrastructure.Repository.BaseRepository;
 
-namespace TODO.Infrastructure.Repository
+namespace Infrastructure.Repository
 {
-   
-    public class RolesRepository(AppDbContext productDbContext) : BaseRepository<Roles>(productDbContext), IRolesRepository
+    public class RolesRepository : BaseRepository<Roles>, IRolesRepository
     {
+        private readonly AppDbContext _context;
 
+        public RolesRepository(AppDbContext context) : base(context)
+        {
+            _context = context;
+        }
+
+        public async Task<Roles?> GetByNameAsync(string name)
+        {
+            return await _context.Roles
+                .FirstOrDefaultAsync(r => r.Name_En != null && r.Name_En.ToLower() == name.ToLower());
+        }
     }
 }

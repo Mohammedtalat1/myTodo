@@ -1,21 +1,18 @@
-﻿using Application.Common;
-using Application.DTOs;
-using Application.IService;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Application.Common;
 using TODO.Application.DTOs;
-using TODO.Domain.Entities;
+using System.Threading.Tasks;
 
 namespace TODO.Application.IService
 {
+    /// <summary>
+    /// Authentication service contract.
+    /// ISP: only auth-related operations — no CRUD on Users (that's IUserService).
+    /// </summary>
     public interface IAuthService
     {
-        Task<Results<AuthResponseDTO>> LoginAsync(LoginDTO dto); // يرجع JWT
+        Task<Results<AuthResponseDTO>> RegisterAsync(RegisterDTO dto);
+        Task<Results<AuthResponseDTO>> LoginAsync(LoginDTO dto);
         Task<Results<bool>> ChangePasswordAsync(int userId, ChangePasswordDTO dto);
-        Task<Results<bool>> LogoutAsync(int userId); // يمكن إدارة RefreshToken هنا إذا أردنا
+        Task<Results<bool>> LogoutAsync(int userId);
     }
-
 }

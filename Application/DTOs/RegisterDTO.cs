@@ -1,13 +1,11 @@
-using Application.DTOs.Base;
 using System.ComponentModel.DataAnnotations;
 
 namespace TODO.Application.DTOs
 {
     /// <summary>
-    /// DTO for creating and updating users.
-    /// Password is plaintext on input — hashed in UserService before persisting.
+    /// DTO for user registration. ConfirmPassword is validated client-side and server-side via Compare.
     /// </summary>
-    public class UserDTO : BaseDTO
+    public class RegisterDTO
     {
         [Required, MaxLength(100)]
         public string FullName { get; set; } = string.Empty;
@@ -18,11 +16,10 @@ namespace TODO.Application.DTOs
         [Required, EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        /// <summary>Plaintext — hashed in UserService.InsertAsync / UpdateAsync.</summary>
-        [Required]
+        [Required, MinLength(8)]
         public string Password { get; set; } = string.Empty;
 
-        [Required]
-        public int RoleId { get; set; }
+        [Required, Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

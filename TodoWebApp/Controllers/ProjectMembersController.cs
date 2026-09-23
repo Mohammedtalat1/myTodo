@@ -1,17 +1,16 @@
-﻿using TODO.Application.DTOs;
+using TODO.Application.DTOs;
 using TODO.Application.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
-using ReservePro.Management.Api.Controllers;
-using TODO.Application.Entities;
+using TODO.API.Controllers;
 
 namespace TODO.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProjectMembersController : BaseController
     {
         private readonly IProjectMemberService _service;
@@ -22,92 +21,48 @@ namespace TODO.API.Controllers
             _service = service;
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var result = await _service.GetAllAsync();
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to retrieve ProjectMembers.");
-
-                return HandleResponse(result, "ProjectMembers retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving all ProjectMembers.");
-            }
+            var result = await _service.GetAllAsync();
+            return HandleResponse(result, "ProjectMembers retrieved successfully.");
         }
-        [Authorize]
-        [HttpGet("{id}")]
+
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var result = await _service.GetByIdAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), $"Failed to retrieve ProjectMember with Id {id}.");
-
-                return HandleResponse(result, "ProjectMember retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving ProjectMember by Id.");
-            }
+            var result = await _service.GetByIdAsync(id);
+            return HandleResponse(result, "ProjectMember retrieved successfully.");
         }
+
+        /// <summary>Add a user to a project. Duplicate memberships are rejected by the service.</summary>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ProjectMemberDTO model)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                var result = await _service.InsertAsync(model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to create ProjectMember.");
-
-                return HandleResponse(result, "ProjectMember created successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while creating ProjectMember.");
-            }
+            var result = await _service.InsertAsync(model);
+            return result.Success
+                ? Ok(new ApiResponse<int>(true, "ProjectMember created successfully.", result.Entity))
+                : BadRequest(new ApiResponse<object>(false, result.Message ?? "Failed to create project member."));
         }
-        [Authorize]
-        [HttpPut("{id}")]
+
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] ProjectMemberDTO model)
         {
-            try
-            {
-                var result = await _service.UpdateAsync(id, model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to update ProjectMember.");
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                return HandleResponse(result, "ProjectMember updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while updating ProjectMember.");
-            }
+            var result = await _service.UpdateAsync(id, model);
+            return HandleResponse(result, "ProjectMember updated successfully.");
         }
-        [Authorize]
-        [HttpDelete("{id}")]
+
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var result = await _service.DeleteAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to delete ProjectMember.");
-
-                return HandleResponse(result, "ProjectMember deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while deleting ProjectMember.");
-            }
+            var result = await _service.DeleteAsync(id);
+            return HandleResponse(result, "ProjectMember deleted successfully.");
         }
     }
 }

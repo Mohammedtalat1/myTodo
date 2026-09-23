@@ -1,4 +1,4 @@
-﻿using Infrastructure.Repository.BaseRepository;
+using Infrastructure.Repository.BaseRepository;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using TODO.Domain.Entities;
@@ -18,7 +18,14 @@ namespace Infrastructure.Repository
 
         public async Task<Users?> GetByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+        }
+
+        public async Task<Users?> GetByUsernameAsync(string username)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
         }
     }
 }

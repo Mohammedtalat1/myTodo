@@ -1,17 +1,16 @@
-﻿using TODO.Application.DTOs;
+using TODO.Application.DTOs;
 using TODO.Application.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
-using ReservePro.Management.Api.Controllers;
-using TODO.Application.Entities;
+using TODO.API.Controllers;
 
 namespace TODO.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProjectsController : BaseController
     {
         private readonly IProjectsService _service;
@@ -22,92 +21,68 @@ namespace TODO.API.Controllers
             _service = service;
         }
 
-        [Authorize]
+        /// <summary>Get all projects (admin view).</summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var result = await _service.GetAllAsync();
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to retrieve Projects.");
-
-                return HandleResponse(result, "Projects retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving all Projects.");
-            }
+            var result = await _service.GetAllAsync();
+            return HandleResponse(result, "Projects retrieved successfully.");
         }
-        [Authorize]
-        [HttpGet("{id}")]
+
+        /// <summary>Get all projects the authenticated user belongs to.</summary>
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyProjects()
+        {
+            var idClaim = User.Claims.FirstOrDefault(c => c.Type == "Id");
+            if (idClaim == null)
+                return Unauthorized(new ApiResponse<object>(false, "Unauthorized."));
+
+            int userId = int.Parse(idClaim.Value);
+            var result = await _service.GetUserProjectsAsync(userId);
+            return HandleResponse(result, "Your projects retrieved successfully.");
+        }
+
+        /// <summary>Get a single project by Id.</summary>
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var result = await _service.GetByIdAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), $"Failed to retrieve Project with Id {id}.");
-
-                return HandleResponse(result, "Project retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving Project by Id.");
-            }
+            var result = await _service.GetByIdAsync(id);
+            return HandleResponse(result, "Project retrieved successfully.");
         }
+
+        /// <summary>Create a new project. Creator is auto-added as Owner.</summary>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ProjectsDTO model)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                var result = await _service.InsertAsync(model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to create Project.");
+            var idClaim = User.Claims.FirstOrDefault(c => c.Type == "Id");
+            int creatorId = idClaim != null ? int.Parse(idClaim.Value) : 0;
 
-                return HandleResponse(result, "Project created successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while creating Project.");
-            }
+            var result = await _service.InsertAsync(model, creatorId);
+            return result.Success
+                ? Ok(new ApiResponse<int>(true, "Project created successfully.", result.Entity))
+                : BadRequest(new ApiResponse<object>(false, result.Message ?? "Failed to create project."));
         }
-        [Authorize]
-        [HttpPut("{id}")]
+
+        /// <summary>Update an existing project.</summary>
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] ProjectsDTO model)
         {
-            try
-            {
-                var result = await _service.UpdateAsync(id, model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to update Project.");
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                return HandleResponse(result, "Project updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while updating Project.");
-            }
+            var result = await _service.UpdateAsync(id, model);
+            return HandleResponse(result, "Project updated successfully.");
         }
-        [Authorize]
-        [HttpDelete("{id}")]
+
+        /// <summary>Delete a project by Id.</summary>
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var result = await _service.DeleteAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to delete Project.");
-
-                return HandleResponse(result, "Project deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while deleting Project.");
-            }
+            var result = await _service.DeleteAsync(id);
+            return HandleResponse(result, "Project deleted successfully.");
         }
     }
 }

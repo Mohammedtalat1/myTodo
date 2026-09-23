@@ -1,16 +1,13 @@
-using Application.DTOs;
+using Application.IService.IBaseService;
+using Application.Common;
 using TODO.Application.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TODO.Application.IService;
-using Application.IService.IBaseService;
-using TODO.Application.Entities;
 
 namespace TODO.Application.IService
 {
     public interface ICommentsService : IBaseServices<CommentsDTO>
     {
-     
+        Task<Results<IEnumerable<CommentsDTO>>> GetByWorkItemAsync(int workItemId);
     }
-
 }

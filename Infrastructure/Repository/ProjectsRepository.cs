@@ -1,5 +1,7 @@
-﻿using Infrastructure.Repository.BaseRepository;
+using Infrastructure.Repository.BaseRepository;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TODO.Domain.Entities;
 using TODO.Domain.IRepository;
@@ -16,5 +18,13 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
+        public async Task<IEnumerable<Projects>> GetByUserIdAsync(int userId)
+        {
+            return await _context.ProjectMembers
+                .Where(pm => pm.UserId == userId)
+                .Include(pm => pm.Project)
+                .Select(pm => pm.Project!)
+                .ToListAsync();
+        }
     }
 }

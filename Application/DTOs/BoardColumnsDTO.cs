@@ -1,10 +1,9 @@
-﻿using Application.DTOs.Base;
-using Domain.Entities.Base;
+using Application.DTOs.Base;
 using System.ComponentModel.DataAnnotations;
-using TODO.Domain.Entities;
 
-namespace TODO.Application.Entities
+namespace TODO.Application.DTOs
 {
+    /// <summary>DTO for a column within a Kanban board.</summary>
     public class BoardColumnsDTO : BaseDTO
     {
         [Required, MaxLength(50)]
@@ -12,7 +11,7 @@ namespace TODO.Application.Entities
 
         public int Order { get; set; }
 
+        [Required]
         public int BoardId { get; set; }
-
     }
 }

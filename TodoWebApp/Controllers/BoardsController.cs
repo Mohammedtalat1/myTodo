@@ -1,17 +1,16 @@
-﻿using TODO.Application.DTOs;
+using TODO.Application.DTOs;
 using TODO.Application.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
-using ReservePro.Management.Api.Controllers;
-using TODO.Application.Entities;
+using TODO.API.Controllers;
 
 namespace TODO.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BoardsController : BaseController
     {
         private readonly IBoardsService _service;
@@ -22,92 +21,48 @@ namespace TODO.API.Controllers
             _service = service;
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var result = await _service.GetAllAsync();
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to retrieve Boards.");
-
-                return HandleResponse(result, "Boards retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving all Boards.");
-            }
+            var result = await _service.GetAllAsync();
+            return HandleResponse(result, "Boards retrieved successfully.");
         }
-        [Authorize]
-        [HttpGet("{id}")]
+
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var result = await _service.GetByIdAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), $"Failed to retrieve Board with Id {id}.");
-
-                return HandleResponse(result, "Board retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while retrieving Board by Id.");
-            }
+            var result = await _service.GetByIdAsync(id);
+            return HandleResponse(result, "Board retrieved successfully.");
         }
+
+        /// <summary>Create a board. Default columns (To Do, In Progress, In Review, Done) are auto-created.</summary>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] BoardsDTO model)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                var result = await _service.InsertAsync(model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to create Board.");
-
-                return HandleResponse(result, "Board created successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while creating Board.");
-            }
+            var result = await _service.InsertAsync(model);
+            return result.Success
+                ? Ok(new ApiResponse<int>(true, "Board created successfully.", result.Entity))
+                : BadRequest(new ApiResponse<object>(false, result.Message ?? "Failed to create board."));
         }
-        [Authorize]
-        [HttpPut("{id}")]
+
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] BoardsDTO model)
         {
-            try
-            {
-                var result = await _service.UpdateAsync(id, model);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to update Board.");
+            if (!ModelState.IsValid)
+                return HandleValidationError(ModelState);
 
-                return HandleResponse(result, "Board updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while updating Board.");
-            }
+            var result = await _service.UpdateAsync(id, model);
+            return HandleResponse(result, "Board updated successfully.");
         }
-        [Authorize]
-        [HttpDelete("{id}")]
+
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var result = await _service.DeleteAsync(id);
-                if (!result.Success)
-                    return HandleError(new Exception(result.Message), "Failed to delete Board.");
-
-                return HandleResponse(result, "Board deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleError(ex, "Error occurred while deleting Board.");
-            }
+            var result = await _service.DeleteAsync(id);
+            return HandleResponse(result, "Board deleted successfully.");
         }
     }
 }
